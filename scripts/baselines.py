@@ -1,7 +1,6 @@
-import pandas as pd
 import json
-import os
 
+import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
@@ -23,22 +22,26 @@ def load_data():
 
 df = load_data()
 
-print(f"Total examples: {len(df)}")
+# Use the manually reviewed gold labels
+df = df[df["gold_intent"].notna()].copy()
+df["gold_intent"] = df["gold_intent"].str.strip()
+
+print(f"Total labelled examples: {len(df)}")
 
 print("\nIntent distribution:")
-print(df["intent"].value_counts())
+print(df["gold_intent"].value_counts())
 
 
-# --------------------------------------------------
+# ==================================================
 # 1. MAJORITY CLASS BASELINE
-# --------------------------------------------------
+# ==================================================
 
-majority_class = df["intent"].value_counts().idxmax()
+majority_class = df["gold_intent"].value_counts().idxmax()
 
 majority_predictions = [majority_class] * len(df)
 
 majority_accuracy = accuracy_score(
-    df["intent"],
+    df["gold_intent"],
     majority_predictions
 )
 
@@ -50,16 +53,16 @@ print(f"Majority intent: {majority_class}")
 print(f"Accuracy: {majority_accuracy:.4f}")
 
 
-# --------------------------------------------------
+# ==================================================
 # 2. TF-IDF + LOGISTIC REGRESSION
-# --------------------------------------------------
+# ==================================================
 
 X_train, X_test, y_train, y_test = train_test_split(
     df["text"],
-    df["intent"],
+    df["gold_intent"],
     test_size=0.2,
     random_state=42,
-    stratify=df["intent"]
+    stratify=df["gold_intent"]
 )
 
 vectorizer = TfidfVectorizer(
@@ -96,6 +99,7 @@ print("==============================")
 print(f"Accuracy: {accuracy:.4f}")
 
 print("\nClassification Report:")
+
 print(
     classification_report(
         y_test,
