@@ -2,7 +2,7 @@ import json
 import statistics
 
 
-INPUT_FILE = "data/golden/judge_scores_30.jsonl"
+INPUT_FILE = "data/golden/judge_scores_60.jsonl"
 
 
 def main():
@@ -20,13 +20,17 @@ def main():
             line = line.strip()
 
             if line:
-                rows.append(json.loads(line))
+                rows.append(
+                    json.loads(line)
+                )
 
     print("\n==============================")
     print("JUDGE SUMMARY")
     print("==============================")
 
-    print(f"Examples: {len(rows)}")
+    print(
+        f"Examples: {len(rows)}"
+    )
 
     metrics = [
         "grounding",
@@ -47,26 +51,24 @@ def main():
             f"{statistics.mean(values):.2f}/5"
         )
 
-    # Overall average across all four dimensions.
     overall_values = []
 
     for row in rows:
 
-        score = (
+        overall = (
             row["grounding"]
             + row["correctness"]
             + row["helpfulness"]
             + row["unsupported_claims"]
         ) / 4
 
-        overall_values.append(score)
+        overall_values.append(overall)
 
     print(
         f"Overall average: "
         f"{statistics.mean(overall_values):.2f}/5"
     )
 
-    # Show weaker responses.
     print("\n==============================")
     print("LOW-SCORING EXAMPLES")
     print("==============================")
@@ -81,7 +83,7 @@ def main():
         ) / 4
     )
 
-    for row in sorted_rows[:5]:
+    for row in sorted_rows[:10]:
 
         overall = (
             row["grounding"]
@@ -90,11 +92,42 @@ def main():
             + row["unsupported_claims"]
         ) / 4
 
-        print("\nTweet:", row["tweet_id"])
-        print(f"Overall: {overall:.2f}/5")
-        print("Customer:", row["customer_text"])
-        print("Reply:", row["generated_reply"])
-        print("Reason:", row["overall_reason"])
+        print(
+            f"\nTweet: {row['tweet_id']}"
+        )
+
+        print(
+            f"Overall: {overall:.2f}/5"
+        )
+
+        print(
+            f"Grounding: {row['grounding']}/5"
+        )
+
+        print(
+            f"Correctness: {row['correctness']}/5"
+        )
+
+        print(
+            f"Helpfulness: {row['helpfulness']}/5"
+        )
+
+        print(
+            f"Unsupported claims: "
+            f"{row['unsupported_claims']}/5"
+        )
+
+        print(
+            f"Customer: {row['customer_text']}"
+        )
+
+        print(
+            f"Reply: {row['generated_reply']}"
+        )
+
+        print(
+            f"Reason: {row['overall_reason']}"
+        )
 
 
 if __name__ == "__main__":
